@@ -1,25 +1,45 @@
-import logo from './logo.svg';
-import './App.css';
+import {useState,useEffect} from 'react';
+import DisplayList from './components/main component/main.component';
+import SearchBox from './components/search-box/search-box.component';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+const App=()=>{
+  const [searchField, setSearchField] = useState('');
+  const[news,setNews]=useState([]);
+  const[filteredNews,setFilteredNews]=useState([news]);
+
+  useEffect(()=>{
+    fetch("https://newsapi.org/v2/top-headlines?country=in&apiKey=0e9110d855bd4fd7a75e857313e3ef98")
+    .then((Response)=>Response.json())
+    .then((data)=>setNews(data.articles));
+  },[]);
+  
+  useEffect(()=>{
+    const newFilteredNews=news.filter((article)=>{
+      const description = article.description ?? ''; 
+      return description.toLocaleLowerCase().includes(searchField);
+    })
+    setFilteredNews(newFilteredNews);
+  },[news,searchField])
+  
+  const onSearchChange = (event) => {
+    const searchFieldString = event.target.value.toLocaleLowerCase();
+    setSearchField(searchFieldString);
+  };
+
+
+  return(
+    <div className='App'>
+    <h1 className='app-title'>News<i>Express</i></h1>
+    <SearchBox
+        className='news-search-box'
+        onChangeHandler={onSearchChange}
+        placeholder='search news'
+      />
+    <DisplayList news={filteredNews}/>
+    
     </div>
-  );
+  )
 }
+
 
 export default App;
